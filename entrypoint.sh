@@ -135,7 +135,7 @@ fi
 docker pull saucelabs/sauce-connect:4.6.2
 docker run \
     --network="host" \
-    --detach --name "sauce-connect"
+    --detach --name "sauce-connect" \
     -t saucelabs/sauce-connect:4.6.2 \
     $params
 
