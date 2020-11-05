@@ -135,9 +135,9 @@ fi
 docker pull saucelabs/sauce-connect:4.6.2
 docker run \
     --network="host" \
+    --detach --name "sauce-connect"
     -t saucelabs/sauce-connect:4.6.2 \
-    $params \
-    &
+    $params
 
 # 30 seconds is generally enough for Sauce Connect to start
 sleep 30

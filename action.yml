@@ -109,6 +109,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  post-entrypoint: 'cleanup.sh'
   args:
     - ${{ inputs.username }}
     - ${{ inputs.accessKey }}

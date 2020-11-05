@@ -10,4 +10,5 @@ LABEL "com.github.actions.icon"="server"
 LABEL "com.github.actions.color"="green"
 
 COPY "entrypoint.sh" "/entrypoint.sh"
+COPY "cleanup.sh" "/cleanup.sh"
 ENTRYPOINT ["sh", "/entrypoint.sh"]
