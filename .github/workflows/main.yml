@@ -30,7 +30,7 @@ jobs:
               with:
                 name: source-connect-logs
                 path: .
-            - runs: |
+            - run: |
                 if [ -f "sauce-connect.log" ]; then
                   echo verified that sauce-connect.log exists in the uploaded artifact
                 else
