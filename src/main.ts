@@ -7,8 +7,8 @@ import {wait} from './wait'
 import optionMappingJson from './option-mapping.json'
 
 const CONTAINER_VERSION = '4.6.2'
-const LOG_FILE = '/srv/sauce-connect.log'
-const PID_FILE = '/srv/sauce-connect.pid'
+const LOG_FILE = '/opt/sauce-connect-action/sauce-connect.log'
+const PID_FILE = '/opt/sauce-connect-action/sauce-connect.pid'
 const READY_FILE = '/opt/sauce-connect-action/sc.ready'
 
 type OptionMapping = {
@@ -45,9 +45,11 @@ function buildOptions(): string[] {
 }
 
 async function run(): Promise<void> {
-    const DIR_IN_HOST = await promises.mkdtemp(
+    const mountedDirInHost = await promises.mkdtemp(
         join(tmpdir(), `sauce-connect-action`)
     )
+    saveState('mountedDir', mountedDirInHost)
+
     const containerName = `saucelabs/sauce-connect:${CONTAINER_VERSION}`
     try {
         await exec('docker', ['pull', containerName])
@@ -59,7 +61,7 @@ async function run(): Promise<void> {
                 '--network=host',
                 '--detach',
                 '-v',
-                `${DIR_IN_HOST}:/opt/sauce-connect-action`,
+                `${mountedDirInHost}:/opt/sauce-connect-action`,
                 '--rm',
                 containerName
             ].concat(buildOptions()),
@@ -72,7 +74,7 @@ async function run(): Promise<void> {
             }
         )
         saveState('containerId', containerId.trim())
-        await wait(DIR_IN_HOST)
+        await wait(mountedDirInHost)
         info('SC ready')
     } catch (error) {
         setFailed(error.message)

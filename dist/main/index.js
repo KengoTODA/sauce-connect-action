@@ -1570,8 +1570,8 @@ const fs_1 = __webpack_require__(747);
 const wait_1 = __webpack_require__(259);
 const option_mapping_json_1 = __importDefault(__webpack_require__(189));
 const CONTAINER_VERSION = '4.6.2';
-const LOG_FILE = '/srv/sauce-connect.log';
-const PID_FILE = '/srv/sauce-connect.pid';
+const LOG_FILE = '/opt/sauce-connect-action/sauce-connect.log';
+const PID_FILE = '/opt/sauce-connect-action/sauce-connect.pid';
 const READY_FILE = '/opt/sauce-connect-action/sc.ready';
 const optionMappings = option_mapping_json_1.default;
 function buildOptions() {
@@ -1600,7 +1600,8 @@ function buildOptions() {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const DIR_IN_HOST = yield fs_1.promises.mkdtemp(path_1.join(os_1.tmpdir(), `sauce-connect-action`));
+        const mountedDirInHost = yield fs_1.promises.mkdtemp(path_1.join(os_1.tmpdir(), `sauce-connect-action`));
+        core_1.saveState('mountedDir', mountedDirInHost);
         const containerName = `saucelabs/sauce-connect:${CONTAINER_VERSION}`;
         try {
             yield exec_1.exec('docker', ['pull', containerName]);
@@ -1610,7 +1611,7 @@ function run() {
                 '--network=host',
                 '--detach',
                 '-v',
-                `${DIR_IN_HOST}:/opt/sauce-connect-action`,
+                `${mountedDirInHost}:/opt/sauce-connect-action`,
                 '--rm',
                 containerName
             ].concat(buildOptions()), {
@@ -1621,7 +1622,7 @@ function run() {
                 }
             });
             core_1.saveState('containerId', containerId.trim());
-            yield wait_1.wait(DIR_IN_HOST);
+            yield wait_1.wait(mountedDirInHost);
             core_1.info('SC ready');
         }
         catch (error) {

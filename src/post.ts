@@ -1,19 +1,30 @@
-import {getState, info, warning, setFailed} from '@actions/core'
+import {info, warning, getState, setFailed} from '@actions/core'
 import {exec} from '@actions/exec'
+import {create} from '@actions/artifact'
+import {uploadLog} from './upload-log'
 
-async function run(): Promise<void> {
-    const containerId = getState('containerId')
+async function stopContainer(containerId: string): Promise<void> {
     if (!containerId) {
         warning(
-            'No state found. Assume that no container run in this workflow run.'
+            'No container ID found in state. Assume that no container run in this workflow run.'
         )
         return
     }
 
+    info(`Trying to stop the docker container with ID ${containerId}...`)
+    await exec('docker', ['container', 'stop', containerId])
+    info('Stopped the docker container successfully.')
+}
+
+async function run(): Promise<void> {
+    const containerId = getState('containerId')
+    const mountedDirInHost = getState('mountedDirInHost')
+    const uploadClient = create()
+
     try {
-        info(`Trying to stop the docker container with ID ${containerId}...`)
-        await exec('docker', ['container', 'stop', containerId])
-        info('Done.')
+        const stopContainerPromise = stopContainer(containerId)
+        const uploadLogPromise = uploadLog(mountedDirInHost, uploadClient)
+        await Promise.all([stopContainerPromise, uploadLogPromise])
     } catch (error) {
         setFailed(error.message)
     }

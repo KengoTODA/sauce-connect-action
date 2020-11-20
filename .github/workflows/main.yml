@@ -21,3 +21,20 @@ jobs:
               env:
                 SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
                 SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+    verify-artifact:
+        runs-on: ubuntu-latest
+        name: Verify the SC log is uploaded as artifact
+        needs: test
+        steps:
+            - uses: actions/download-artifact@v2
+              with:
+                name: source-connect-logs
+                path: .
+            - runs: |
+                if [ -f "sauce-connect.log" ]; then
+                  echo verified that sauce-connect.log exists in the uploaded artifact
+                else
+                  echo no sauce-connect.log found in the uploaded artifact
+                  exit 1
+                fi
+
